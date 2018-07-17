@@ -37,11 +37,19 @@ Clustering
 
 -   OPCIÓN 1: Utilizar las variancias y luego agrupar por magnitud.
 
-<!-- -->
+``` r
+aa<-round(c(apply(caudal[,-c(1:3)],2,var)),4)
+loca$rank_var <- cut_number(aa,5)
+sq_map <- get_map(location = sbbox, maptype = "satellite", source = "google")
+```
 
     ## converting bounding box to center/zoom specification. (experimental)
 
     ## Map from URL : http://maps.googleapis.com/maps/api/staticmap?center=18.8,-93.6645&zoom=5&size=640x640&scale=2&maptype=satellite&language=en-EN&sensor=false
+
+``` r
+ggmap(sq_map) + geom_point(data = loca, mapping = aes(x = Longitud, y = Latitud, colour=rank_var))
+```
 
 ![](clusters_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-3-1.png)
 
@@ -70,36 +78,40 @@ round(tapply(data$Mediana_de_cluster, data$rank_var,median),4)
 
 Primero, se deben calcular los PCA utilizando las anomalías en lugar de las observaciones. Como se tiene la climatología mensual para cada locación, el cálculo consiste en restar la climatología mensual a cada observación, según el mes correspondiente. Luego, se procede a hacer el PCA y por último agrupar las estaciones utilizando k-means.
 
+``` r
+clima2 <- as.matrix(clima[,-1]) %x% rep(1, 11)
+anomalies <- caudal[,-c(1:3)]-clima2
+pc <- princomp(anomalies)
+plot(pc)
+```
+
 ![](clusters_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-5-1.png)
 
-    ##   Group.1      Comp.1      Comp.2      Comp.3        Comp.4       Comp.5
-    ## 1       1 -0.05125520  0.02909881 -0.05445704  0.0008186019  0.026668324
-    ## 2       2 -0.20806905  0.01347129  0.17347811 -0.8315766147  0.217386109
-    ## 3       3 -0.06629321  0.02822561  0.01429151  0.0131680644  0.007003244
-    ## 4       4 -0.12317920  0.02414893  0.06747755  0.0828433577  0.079118705
-    ## 5       5 -0.07997562  0.02238608 -0.11116728  0.0253192447 -0.033255513
-    ## 6       6 -0.12008978 -0.05523674 -0.05684092 -0.0314264300 -0.106779423
-    ##        Comp.6       Comp.7       Comp.8       Comp.9      Comp.10
-    ## 1 -0.01780312  0.006284231  0.009981032 -0.007468676  0.004360678
-    ## 2  0.26814490  0.267250381 -0.091022408 -0.068145605 -0.018697883
-    ## 3  0.10964016 -0.157906345  0.045651317 -0.067226617 -0.050433257
-    ## 4  0.07604138  0.004967214 -0.120290036 -0.004541390  0.168701354
-    ## 5  0.06639439 -0.001874692 -0.136263009  0.011557863 -0.003318273
-    ## 6 -0.06934770  0.001143187  0.038789309  0.030578343  0.013384317
-    ##         Comp.11     Comp.12      Comp.13      Comp.14     Comp.15
-    ## 1  0.0070690943 -0.01101407  0.024859704 -0.028505107  0.01400534
-    ## 2 -0.0388565369 -0.03372980  0.007952296  0.053920668  0.04383237
-    ## 3  0.0466489518 -0.01989926  0.016041620  0.043139092  0.01470809
-    ## 4  0.0003574004  0.10137164 -0.033743081  0.099748296 -0.14868432
-    ## 5 -0.0115762082 -0.10129288  0.019149540 -0.009139446  0.07220448
-    ## 6 -0.0544634196  0.07928775  0.014895904  0.061572854 -0.01607643
-    ##        Comp.16      Comp.17      Comp.18     Comp.19      Comp.20
-    ## 1 -0.021864079 -0.005406755  0.004599997 -0.03278429 -0.008874313
-    ## 2  0.026368912  0.048220831 -0.002071238  0.07376977 -0.031880265
-    ## 3  0.019750806  0.025634377 -0.036808281  0.01909085 -0.073803755
-    ## 4  0.028094769 -0.012262011 -0.081192736 -0.08843847  0.070592273
-    ## 5  0.006401919 -0.182405315  0.023480598  0.12989158  0.086875537
-    ## 6 -0.065994938  0.002731419 -0.035894864  0.05991687 -0.053046797
+``` r
+mydata <- (pc$loadings[,1:10])
+fit <- kmeans(mydata, 6) 
+aggregate(mydata,by=list(fit$cluster),FUN=mean)
+```
+
+    ##   Group.1      Comp.1      Comp.2       Comp.3      Comp.4      Comp.5
+    ## 1       1 -0.03236753  0.02003948 -0.052705757 -0.01155176 -0.03723761
+    ## 2       2 -0.09226363  0.10238656 -0.249245515 -0.01029817  0.31521900
+    ## 3       3 -0.31486547  0.03354574  0.149833574 -0.16014539  0.08677194
+    ## 4       4 -0.07378654  0.05579737 -0.063748735  0.04383224  0.09371667
+    ## 5       5 -0.08035949  0.02079995  0.001412865  0.03520990  0.02090186
+    ## 6       6 -0.21944872 -0.14916599  0.071209607 -0.03162633 -0.09476993
+    ##        Comp.6       Comp.7      Comp.8       Comp.9     Comp.10
+    ## 1 -0.01263461  0.005131228 -0.03860683  0.006903447  0.01340550
+    ## 2 -0.23821138 -0.012421407  0.05428449 -0.162107082 -0.02525471
+    ## 3  0.06522142  0.265201443  0.11074939  0.125737832 -0.16811471
+    ## 4  0.15461689 -0.036529076  0.09287214  0.059983120  0.14240901
+    ## 5  0.10697671 -0.108308240 -0.06202052 -0.080938962 -0.11137158
+    ## 6 -0.09913274 -0.138107310  0.07959327 -0.102756546  0.09585316
+
+``` r
+loca <- data.frame(loca, cluster=fit$cluster)
+ggmap(sq_map) + geom_point(data = loca, mapping = aes(x = Longitud, y = Latitud, colour=as.character(cluster)))
+```
 
 ![](clusters_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-5-2.png)
 
@@ -113,9 +125,9 @@ round(tapply(data$area, data$cluster2,mean),4)
 ```
 
     ##            1            2            3            4            5 
-    ## 2.867119e+04 2.000000e+02 2.012262e+03 1.888167e+03 2.579857e+03 
+    ## 2.523472e+04 1.454000e+03 4.013338e+08 8.170400e+03 2.446700e+03 
     ##            6 
-    ## 1.094585e+08
+    ## 8.013333e+02
 
 ``` r
 ## Medianan del Caudal de cada cluster:                                         
@@ -123,13 +135,27 @@ round(tapply(data$Mediana_de_cluster, data$cluster2,median),4)
 ```
 
     ##      1      2      3      4      5      6 
-    ## 0.2077 4.7279 0.5400 1.6557 0.2013 0.2057
+    ## 0.1344 0.9366 8.9766 1.2963 0.7304 4.2840
 
 -   OPCIÓN 3: Cluster para las series de tiempo.
 
 En este caso también se deben calcular las anomalías. Luego, se procede a aplicar el algoritmo de TSclust, que se describe aquí: <https://www.jstatsoft.org/article/view/v062i01/v62i01.pdf>
 
-![](clusters_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-7-1.png)![](clusters_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-7-2.png)
+``` r
+dpred <- diss(anomalies, "ACF", p=0.05)
+hc.pred <- hclust(dpred)
+plot(hc.pred)
+```
+
+![](clusters_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-7-1.png)
+
+``` r
+aa<-cutree(hc.pred, k = 6)
+loca <- data.frame(loca, clusterTS=aa )
+ggmap(sq_map) + geom_point(data = loca, mapping = aes(x = Longitud, y = Latitud, colour=as.character(clusterTS)))
+```
+
+![](clusters_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-7-2.png)
 
 Descripción de los clusters:
 
@@ -151,4 +177,4 @@ round(tapply(data$Mediana_de_cluster, data$cluster2,median),4)
 ```
 
     ##      1      2      3      4      5      6 
-    ## 0.2077 4.7279 0.5400 1.6557 0.2013 0.2057
+    ## 0.1344 0.9366 8.9766 1.2963 0.7304 4.2840
