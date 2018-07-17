@@ -76,7 +76,7 @@ round(tapply(data$Mediana_de_cluster, data$rank_var,median),4)
 
 -   OPCIÓN 2: k-means usando los componentes de PCA.
 
-Primero, se deben calcular los PCA utilizando las anomalías en lugar de las observaciones. Como se tiene la climatología mensual para cada locación, el cálculo consiste en restar la climatología mensual a cada observación, según el mes correspondiente. Luego, se procede a hacer el PCA y por último agrupar las estaciones utilizando k-means.
+Primero, se deben calcular los PCA utilizando las anomalías en lugar de las observaciones. Como se tiene la climatología mensual para cada locación, el cálculo consiste en restar la climatología mensual a cada observación, según el mes correspondiente. Luego, se procede a hacer el PCA y por último agrupar las estaciones utilizando k-means de los primeros 10 componentes.
 
 ``` r
 clima2 <- as.matrix(clima[,-1]) %x% rep(1, 11)
@@ -93,20 +93,20 @@ fit <- kmeans(mydata, 6)
 aggregate(mydata,by=list(fit$cluster),FUN=mean)
 ```
 
-    ##   Group.1      Comp.1      Comp.2       Comp.3      Comp.4      Comp.5
-    ## 1       1 -0.03236753  0.02003948 -0.052705757 -0.01155176 -0.03723761
-    ## 2       2 -0.09226363  0.10238656 -0.249245515 -0.01029817  0.31521900
-    ## 3       3 -0.31486547  0.03354574  0.149833574 -0.16014539  0.08677194
-    ## 4       4 -0.07378654  0.05579737 -0.063748735  0.04383224  0.09371667
-    ## 5       5 -0.08035949  0.02079995  0.001412865  0.03520990  0.02090186
-    ## 6       6 -0.21944872 -0.14916599  0.071209607 -0.03162633 -0.09476993
-    ##        Comp.6       Comp.7      Comp.8       Comp.9     Comp.10
-    ## 1 -0.01263461  0.005131228 -0.03860683  0.006903447  0.01340550
-    ## 2 -0.23821138 -0.012421407  0.05428449 -0.162107082 -0.02525471
-    ## 3  0.06522142  0.265201443  0.11074939  0.125737832 -0.16811471
-    ## 4  0.15461689 -0.036529076  0.09287214  0.059983120  0.14240901
-    ## 5  0.10697671 -0.108308240 -0.06202052 -0.080938962 -0.11137158
-    ## 6 -0.09913274 -0.138107310  0.07959327 -0.102756546  0.09585316
+    ##   Group.1      Comp.1      Comp.2      Comp.3      Comp.4      Comp.5
+    ## 1       1 -0.23102533 -0.89974452 -0.25458406 -0.03555553  0.04093526
+    ## 2       2 -0.17505225  0.02100372 -0.01848551  0.08860101  0.03406538
+    ## 3       3 -0.04493411  0.02000804 -0.03369640 -0.01198930 -0.04525669
+    ## 4       4 -0.07236389  0.03996056 -0.02568390 -0.05189148  0.11409761
+    ## 5       5 -0.09226363  0.10238656 -0.24924551 -0.01029817  0.31521900
+    ## 6       6 -0.21909198  0.04687819  0.10998503  0.06257886  0.04684744
+    ##         Comp.6       Comp.7       Comp.8      Comp.9      Comp.10
+    ## 1  0.027942613 -0.117214555  0.047311531  0.07357872  0.004026195
+    ## 2  0.046912464  0.010931621 -0.251844773  0.01360782  0.065233715
+    ## 3 -0.001876355 -0.027558776 -0.004999674 -0.03049197  0.004020674
+    ## 4  0.159820495  0.003223046  0.107345441  0.02723663  0.128023216
+    ## 5 -0.238211378 -0.012421407  0.054284488 -0.16210708 -0.025254710
+    ## 6  0.015694867 -0.033484327  0.084285252  0.17957066 -0.310820339
 
 ``` r
 loca <- data.frame(loca, cluster=fit$cluster)
@@ -121,13 +121,13 @@ Descripción de los clusters:
 data <- as_tibble(cbind(loca,medianas))
 names(data) <- c("cod","lat","lon","area","rank_var","cluster2","Mediana_de_cluster")
 ## Area promedio de cada cluster:
-round(tapply(data$area, data$cluster2,mean),4)
+round(tapply(data$area,data$cluster2,mean),4)
 ```
 
     ##            1            2            3            4            5 
-    ## 2.523472e+04 1.454000e+03 4.013338e+08 8.170400e+03 2.446700e+03 
+    ## 7.300000e+01 1.844143e+03 2.104611e+04 8.076500e+03 1.454000e+03 
     ##            6 
-    ## 8.013333e+02
+    ## 3.010004e+08
 
 ``` r
 ## Medianan del Caudal de cada cluster:                                         
@@ -135,7 +135,7 @@ round(tapply(data$Mediana_de_cluster, data$cluster2,median),4)
 ```
 
     ##      1      2      3      4      5      6 
-    ## 0.1344 0.9366 8.9766 1.2963 0.7304 4.2840
+    ## 9.4685 4.6981 0.1775 1.2963 0.9366 4.6555
 
 -   OPCIÓN 3: Cluster para las series de tiempo.
 
@@ -177,4 +177,4 @@ round(tapply(data$Mediana_de_cluster, data$cluster2,median),4)
 ```
 
     ##      1      2      3      4      5      6 
-    ## 0.1344 0.9366 8.9766 1.2963 0.7304 4.2840
+    ## 9.4685 4.6981 0.1775 1.2963 0.9366 4.6555

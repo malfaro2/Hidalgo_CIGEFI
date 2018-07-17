@@ -91,7 +91,7 @@ Descripción de los clusters:
 data <- as_tibble(cbind(loca,medianas))
 names(data) <- c("cod","lat","lon","area","rank_var","cluster2","Mediana_de_cluster")
 ## Area promedio de cada cluster:
-round(tapply(data$area, data$cluster2,mean),4)
+round(tapply(data$area,data$cluster2,mean),4)
 ## Medianan del Caudal de cada cluster:                                         
 round(tapply(data$Mediana_de_cluster, data$cluster2,median),4)
 ```
