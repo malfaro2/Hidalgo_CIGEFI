@@ -1,6 +1,6 @@
 ---
 title: "Clusters"
-output: github_document
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
@@ -13,7 +13,7 @@ library(TSclust)
 library(dplyr)
 ```
 
-# Construcción de clusters con las observaciones de 74 estaciones en CA
+# Construcción de clusters con las observaciones de 41 estaciones en CA
 
 Existen muchas opciones para agrupar los caudales de las estaciones, así que se elige trabajar con 3:
 
@@ -44,13 +44,27 @@ sq_map <- get_map(location = sbbox, maptype = "terrain", source = "google")
 ggmap(sq_map) + geom_point(data = loca, mapping = aes(x = Longitud, y = Latitud), color = "red")
 ```
 
+Como las locaciones incluyen varias estaciones en el Norte de México, se realiza un corte en la latitud 20 y en la longitud -100, para obtener 41 estaciones localizadas en Centroamérica:
+
+```{r echo=FALSE, warning=FALSE}
+loca <- read.csv(file="locations.csv")
+estaciones <- which(loca$Latitud < 20& loca$Longitud > -100)
+loca <- loca[loca$Latitud < 20& loca$Longitud > -100,]
+dim(loca) ## 41 estaciones en lugar de 74
+sbbox <- make_bbox(lon = loca$Longitud, lat = loca$Latitud, f = .1)
+sbbox
+sq_map <- get_map(location = sbbox, maptype = "terrain", source = "google")
+ggmap(sq_map) + geom_point(data = loca, mapping = aes(x = Longitud, y = Latitud), color = "red")
+```
+
 
 ## Clustering
 
 * OPCIÓN 1: Utilizar las variancias y luego agrupar por magnitud.
 
 ```{r warning=FALSE}
-aa<-round(c(apply(caudal[,-c(1:3)],2,var)),4)
+caudal2 <- caudal[,-c(1:3)][,estaciones]
+aa<-round(c(apply(caudal2,2,var)),4)
 loca$rank_var <- cut_number(aa,5)
 sq_map <- get_map(location = sbbox, maptype = "satellite", source = "google")
 ggmap(sq_map) + geom_point(data = loca, mapping = aes(x = Longitud, y = Latitud, colour=rank_var))
@@ -59,11 +73,11 @@ ggmap(sq_map) + geom_point(data = loca, mapping = aes(x = Longitud, y = Latitud,
 Descripción de los clusters:
 
 ```{r warning=FALSE}
-medianas <- apply(caudal[,-c(1:3)],2,median)
+medianas <- apply(caudal2,2,median)
 data <- as_tibble(cbind(loca,medianas))
 names(data) <- c("cod","lat","lon","area","rank_var","Mediana_de_cluster")
 ## Area promedio de cada cluster:
-round(tapply(data$area, data$rank_var,mean),4)
+as.integer(tapply(data$area, data$rank_var,mean))
 ## Mediana del Caudal de cada cluster:                                         
 round(tapply(data$Mediana_de_cluster, data$rank_var,median),4)
 ```
@@ -74,8 +88,8 @@ round(tapply(data$Mediana_de_cluster, data$rank_var,median),4)
 Primero, se deben calcular los PCA utilizando las anomalías en lugar de las observaciones. Como se tiene la climatología mensual para cada locación, el cálculo consiste en restar la climatología mensual a cada observación, según el mes correspondiente. Luego, se procede a hacer el PCA y por último agrupar las estaciones utilizando k-means de los primeros 10 componentes.
 
 ```{r warning=FALSE}
-clima2 <- as.matrix(clima[,-1]) %x% rep(1, 11)
-anomalies <- caudal[,-c(1:3)]-clima2
+clima2 <- (as.matrix(clima[,-1]) %x% rep(1, 11))[,estaciones]
+anomalies <- caudal2-clima2
 pc <- princomp(anomalies)
 plot(pc)
 mydata <- (pc$loadings[,1:10])
@@ -91,7 +105,7 @@ Descripción de los clusters:
 data <- as_tibble(cbind(loca,medianas))
 names(data) <- c("cod","lat","lon","area","rank_var","cluster2","Mediana_de_cluster")
 ## Area promedio de cada cluster:
-round(tapply(data$area,data$cluster2,mean),4)
+round(as.integer(tapply(data$area,data$cluster2,mean)),0)
 ## Medianan del Caudal de cada cluster:                                         
 round(tapply(data$Mediana_de_cluster, data$cluster2,median),4)
 ```
@@ -117,7 +131,7 @@ Descripción de los clusters:
 data <- as_tibble(cbind(loca,medianas))
 names(data) <- c("cod","lat","lon","area","rank_var","cluster2","clusterTS", "Mediana_de_cluster")
 ## Area promedio de cada cluster:
-round(tapply(data$area, data$clusterTS,mean),4)
+as.integer(tapply(data$area, data$clusterTS,mean))
 ## Mediana del Caudal de cada cluster:                                         
 round(tapply(data$Mediana_de_cluster, data$cluster2,median),4)
 ```
