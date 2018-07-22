@@ -87,6 +87,13 @@ round(tapply(data$Mediana_de_cluster, data$rank_var,median),4)
     ##    [0,0.868] (0.868,3.16]     (3.16,7]     (7,23.6]   (23.6,113] 
     ##       0.2100       0.6966       1.2184       2.9613       5.8753
 
+``` r
+matplot(caudal2,type="l", col=data$rank_var)
+legend("topright", levels(data$rank_var),col=1:5,cex=0.8,fill=1:5)
+```
+
+![](clusters_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-5-1.png)
+
 -   OPCIÓN 2: k-means usando los componentes de PCA.
 
 Primero, se deben calcular los PCA utilizando las anomalías en lugar de las observaciones. Como se tiene la climatología mensual para cada locación, el cálculo consiste en restar la climatología mensual a cada observación, según el mes correspondiente. Luego, se procede a hacer el PCA y por último agrupar las estaciones utilizando k-means de los primeros 10 componentes.
@@ -106,20 +113,20 @@ fit <- kmeans(mydata, 6)
 aggregate(mydata,by=list(fit$cluster),FUN=mean)
 ```
 
-    ##   Group.1      Comp.1      Comp.2       Comp.3      Comp.4       Comp.5
-    ## 1       1 -0.07138688 -0.03575786  0.053521355  0.06858059  0.239623080
-    ## 2       2 -0.05526741 -0.01910186 -0.002173103  0.01800686  0.008018061
-    ## 3       3 -0.37626234 -0.06992115  0.062077039 -0.19469820  0.010506763
-    ## 4       4 -0.24592266  0.91456306 -0.166646054  0.07449124  0.037677192
-    ## 5       5 -0.21298497 -0.02347980  0.026609701 -0.07421125 -0.034856633
-    ## 6       6 -0.12027666 -0.10233604 -0.286085611  0.10603650  0.026838837
+    ##   Group.1      Comp.1      Comp.2      Comp.3      Comp.4     Comp.5
+    ## 1       1 -0.10973640  0.04393558 -0.10629680 -0.10949366 0.06474048
+    ## 2       2 -0.12027666 -0.10233604 -0.28608561  0.10603650 0.02683884
+    ## 3       3 -0.24592266  0.91456306 -0.16664605  0.07449124 0.03767719
+    ## 4       4 -0.21288492 -0.02967169  0.37340500  0.76764079 0.37206089
+    ## 5       5 -0.09231858 -0.03029836  0.01572769 -0.01061581 0.02631886
+    ## 6       6 -0.37626234 -0.06992115  0.06207704 -0.19469820 0.01050676
     ##        Comp.6       Comp.7       Comp.8       Comp.9       Comp.10
-    ## 1 -0.05560944 -0.133807882 -0.066066737 -0.160753964 -0.0208977881
-    ## 2 -0.09832156 -0.004165624  0.006686226  0.010004756  0.1042556856
-    ## 3  0.27822100 -0.054305194 -0.336906070  0.211989055  0.0261137531
-    ## 4 -0.11972971  0.009819237 -0.093040079 -0.003632703 -0.0027044916
-    ## 5 -0.02891006 -0.039503197  0.202251556  0.007406858 -0.0869365436
-    ## 6 -0.01058128  0.108502863 -0.045613799 -0.048656972  0.0003403794
+    ## 1  0.13345508 -0.147804567  0.356004204  0.054073415  0.2313946438
+    ## 2 -0.01058128  0.108502863 -0.045613799 -0.048656972  0.0003403794
+    ## 3 -0.11972971  0.009819237 -0.093040079 -0.003632703 -0.0027044916
+    ## 4  0.22721034 -0.086379727  0.088968248  0.013361527 -0.0136745190
+    ## 5 -0.10579645 -0.023716453  0.006606544 -0.032170181  0.0134004947
+    ## 6  0.27822100 -0.054305194 -0.336906070  0.211989055  0.0261137531
 
 ``` r
 loca <- data.frame(loca, cluster=fit$cluster)
@@ -137,7 +144,7 @@ names(data) <- c("cod","lat","lon","area","rank_var","cluster2","Mediana_de_clus
 round(as.integer(tapply(data$area,data$cluster2,mean)),0)
 ```
 
-    ## [1]      1324      6971 602000668        73      1511      7266
+    ## [1]       787      7266        73       200      5106 602000668
 
 ``` r
 ## Medianan del Caudal de cada cluster:                                         
@@ -145,7 +152,14 @@ round(tapply(data$Mediana_de_cluster, data$cluster2,median),4)
 ```
 
     ##      1      2      3      4      5      6 
-    ## 0.6966 0.3910 9.0093 9.4685 4.5827 1.8953
+    ## 1.8932 1.8953 9.4685 4.7279 0.6966 9.0093
+
+``` r
+matplot(caudal2,type="l", col=data$cluster2)
+legend("topright", levels(as.factor(data$cluster2)),col=1:6,cex=0.8,fill=1:6)
+```
+
+![](clusters_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-7-1.png)
 
 -   OPCIÓN 3: Cluster para las series de tiempo.
 
@@ -180,8 +194,15 @@ as.integer(tapply(data$area, data$clusterTS,mean))
 
 ``` r
 ## Mediana del Caudal de cada cluster:                                         
-round(tapply(data$Mediana_de_cluster, data$cluster2,median),4)
+round(tapply(data$Mediana_de_cluster, data$clusterTS,median),4)
 ```
 
     ##      1      2      3      4      5      6 
-    ## 0.6966 0.3910 9.0093 9.4685 4.5827 1.8953
+    ## 1.0043 4.1007 0.2885 0.2879 1.4182 5.0170
+
+``` r
+matplot(caudal2,type="l", col=data$clusterTS)
+legend("topright", levels(as.factor(data$clusterTS)),col=1:6,cex=0.8,fill=1:6)
+```
+
+![](clusters_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-9-1.png)
