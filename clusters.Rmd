@@ -111,8 +111,17 @@ names(data) <- c("cod","lat","lon","area","rank_var","cluster2","Mediana_de_clus
 round(as.integer(tapply(data$area,data$cluster2,mean)),0)
 ## Medianan del Caudal de cada cluster:                                         
 round(tapply(data$Mediana_de_cluster, data$cluster2,median),4)
+```
 
+## Series de datos según cluster
+```{r warning=FALSE}
 matplot(caudal2,type="l", col=data$cluster2)
+legend("topright", levels(as.factor(data$cluster2)),col=1:6,cex=0.8,fill=1:6)
+```
+
+## Series de anomalías según cluster
+```{r warning=FALSE}
+matplot(anomalies,type="l", col=data$cluster2)
 legend("topright", levels(as.factor(data$cluster2)),col=1:6,cex=0.8,fill=1:6)
 ```
 
@@ -140,7 +149,16 @@ names(data) <- c("cod","lat","lon","area","rank_var","cluster2","clusterTS", "Me
 as.integer(tapply(data$area, data$clusterTS,mean))
 ## Mediana del Caudal de cada cluster:                                         
 round(tapply(data$Mediana_de_cluster, data$clusterTS,median),4)
+```
 
+## Series de datos según cluster
+```{r warning=FALSE}
 matplot(caudal2,type="l", col=data$clusterTS)
+legend("topright", levels(as.factor(data$clusterTS)),col=1:6,cex=0.8,fill=1:6)
+```
+
+## Series de anomalías según cluster
+```{r warning=FALSE}
+matplot(anomalies,type="l", col=data$clusterTS)
 legend("topright", levels(as.factor(data$clusterTS)),col=1:6,cex=0.8,fill=1:6)
 ```

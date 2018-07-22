@@ -113,20 +113,20 @@ fit <- kmeans(mydata, 6)
 aggregate(mydata,by=list(fit$cluster),FUN=mean)
 ```
 
-    ##   Group.1      Comp.1      Comp.2      Comp.3      Comp.4     Comp.5
-    ## 1       1 -0.10973640  0.04393558 -0.10629680 -0.10949366 0.06474048
-    ## 2       2 -0.12027666 -0.10233604 -0.28608561  0.10603650 0.02683884
-    ## 3       3 -0.24592266  0.91456306 -0.16664605  0.07449124 0.03767719
-    ## 4       4 -0.21288492 -0.02967169  0.37340500  0.76764079 0.37206089
-    ## 5       5 -0.09231858 -0.03029836  0.01572769 -0.01061581 0.02631886
-    ## 6       6 -0.37626234 -0.06992115  0.06207704 -0.19469820 0.01050676
-    ##        Comp.6       Comp.7       Comp.8       Comp.9       Comp.10
-    ## 1  0.13345508 -0.147804567  0.356004204  0.054073415  0.2313946438
-    ## 2 -0.01058128  0.108502863 -0.045613799 -0.048656972  0.0003403794
-    ## 3 -0.11972971  0.009819237 -0.093040079 -0.003632703 -0.0027044916
-    ## 4  0.22721034 -0.086379727  0.088968248  0.013361527 -0.0136745190
-    ## 5 -0.10579645 -0.023716453  0.006606544 -0.032170181  0.0134004947
-    ## 6  0.27822100 -0.054305194 -0.336906070  0.211989055  0.0261137531
+    ##   Group.1      Comp.1      Comp.2      Comp.3        Comp.4      Comp.5
+    ## 1       1 -0.13463590 -0.07126630 -0.15472253  0.0394500874  0.01534448
+    ## 2       2 -0.11845462 -0.04857904  0.18338524  0.2758140488  0.18511996
+    ## 3       3 -0.04140286 -0.03168384 -0.03829811 -0.0224804920  0.09577900
+    ## 4       4 -0.17920240  0.01375610  0.02655788 -0.1144877691  0.07590926
+    ## 5       5 -0.24592266  0.91456306 -0.16664605  0.0744912421  0.03767719
+    ## 6       6 -0.22262990 -0.01853355  0.13014545 -0.0004914704 -0.21409357
+    ##        Comp.6       Comp.7       Comp.8       Comp.9      Comp.10
+    ## 1  0.02896805  0.070019476 -0.085889424 -0.001251744  0.004495888
+    ## 2 -0.15186986  0.036780594 -0.036635744  0.253885261  0.145636885
+    ## 3 -0.08529693 -0.130412535  0.004526803 -0.038252626  0.037207140
+    ## 4  0.04641769  0.152081548  0.254671091 -0.033237309  0.072798053
+    ## 5 -0.11972971  0.009819237 -0.093040079 -0.003632703 -0.002704492
+    ## 6 -0.13728246 -0.081248504  0.038758394 -0.119961190 -0.060593126
 
 ``` r
 loca <- data.frame(loca, cluster=fit$cluster)
@@ -144,7 +144,7 @@ names(data) <- c("cod","lat","lon","area","rank_var","cluster2","Mediana_de_clus
 round(as.integer(tapply(data$area,data$cluster2,mean)),0)
 ```
 
-    ## [1]       787      7266        73       200      5106 602000668
+    ## [1] 100339702       218      6626      1851        73       947
 
 ``` r
 ## Medianan del Caudal de cada cluster:                                         
@@ -152,14 +152,27 @@ round(tapply(data$Mediana_de_cluster, data$cluster2,median),4)
 ```
 
     ##      1      2      3      4      5      6 
-    ## 1.8932 1.8953 9.4685 4.7279 0.6966 9.0093
+    ## 1.4733 0.3344 0.5439 4.6981 9.4685 4.1007
+
+Series de datos según cluster
+-----------------------------
 
 ``` r
 matplot(caudal2,type="l", col=data$cluster2)
 legend("topright", levels(as.factor(data$cluster2)),col=1:6,cex=0.8,fill=1:6)
 ```
 
-![](clusters_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-7-1.png)
+![](clusters_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-8-1.png)
+
+Series de anomalías según cluster
+---------------------------------
+
+``` r
+matplot(anomalies,type="l", col=data$cluster2)
+legend("topright", levels(as.factor(data$cluster2)),col=1:6,cex=0.8,fill=1:6)
+```
+
+![](clusters_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-9-1.png)
 
 -   OPCIÓN 3: Cluster para las series de tiempo.
 
@@ -171,7 +184,7 @@ hc.pred <- hclust(dpred)
 plot(hc.pred)
 ```
 
-![](clusters_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-8-1.png)
+![](clusters_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-10-1.png)
 
 ``` r
 aa<-cutree(hc.pred, k = 6)
@@ -179,7 +192,7 @@ loca <- data.frame(loca, clusterTS=aa )
 ggmap(sq_map) + geom_point(data = loca, mapping = aes(x = Longitud, y = Latitud, colour=as.character(clusterTS)))
 ```
 
-![](clusters_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-8-2.png)
+![](clusters_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-10-2.png)
 
 Descripción de los clusters:
 
@@ -200,9 +213,22 @@ round(tapply(data$Mediana_de_cluster, data$clusterTS,median),4)
     ##      1      2      3      4      5      6 
     ## 1.0043 4.1007 0.2885 0.2879 1.4182 5.0170
 
+Series de datos según cluster
+-----------------------------
+
 ``` r
 matplot(caudal2,type="l", col=data$clusterTS)
 legend("topright", levels(as.factor(data$clusterTS)),col=1:6,cex=0.8,fill=1:6)
 ```
 
-![](clusters_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-9-1.png)
+![](clusters_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-12-1.png)
+
+Series de anomalías según cluster
+---------------------------------
+
+``` r
+matplot(anomalies,type="l", col=data$clusterTS)
+legend("topright", levels(as.factor(data$clusterTS)),col=1:6,cex=0.8,fill=1:6)
+```
+
+![](clusters_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-13-1.png)
