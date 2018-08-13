@@ -1,6 +1,7 @@
 ---
 title: "Clusters"
-output: html_document
+output: github_document
+always_allow_html: yes
 ---
 
 ```{r setup, include=FALSE}
@@ -87,7 +88,7 @@ eofPlot(eof(anomalies, n = 6), type="coef")
 
 mydata <- (eof(anomalies, n = 6)$REOF[,1:6])
 fit <- kmeans(mydata, 6) 
-aggregate(mydata,by=list(fit$cluster),FUN=mean)
+#aggregate(mydata,by=list(fit$cluster),FUN=mean)
 loca <- data.frame(loca, cluster=fit$cluster)
 ggmap(sq_map) + geom_point(data = loca, mapping = aes(x = Longitud, y = Latitud, colour=as.character(cluster)))
 ```
@@ -99,7 +100,7 @@ medianas <- apply(caudal2,2,median)
 data <- as_tibble(cbind(loca,medianas))
 names(data) <- c("cod","lat","lon","area","rank_var","Mediana_de_cluster")
 ## Area promedio y mediana de cada cluster:
-kable(data %>% group_by(Cluster=rank_var) %>% summarize(Area_prom =mean(area), Mediana_Esc = median(Mediana_de_cluster)),digits=2)
+kable(data %>% group_by(Cluster=rank_var) %>% summarize(Areaprom =mean(area), MedianaEsc = median(Mediana_de_cluster)),digits=2)
 ```
 
 ## Series de datos según cluster
